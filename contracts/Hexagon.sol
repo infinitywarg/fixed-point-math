@@ -15,6 +15,7 @@ contract Hexagon {
     int128 internal constant UNITY = 1e6;
     int128 internal constant PI = 3_141593;
     int128 internal constant E = 2_718282;
+    int128 internal constant LOG2E = 1_442695;
 
     /// @notice Modifier to check for overflow and underflow
     /// @dev Maximum Number = 999,999,999,999.999999, Minimum Number = -999,999,999,999.999999
