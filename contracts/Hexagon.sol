@@ -7,9 +7,11 @@ pragma solidity =0.8.8;
 /// @dev By restricting the math inputs to +/- 1 trillion with 6-decimals i.e. 1e18, overflow/underflow never occcurs for 128-bit signd integers
 
 contract Hexagon {
-    int128 private constant MAX_INT = 1e18;
-    int128 private constant MIN_INT = -1e18;
-    int128 private constant ADJ_18 = 1e12;
+    int128 private constant MAX = 1e18;
+    int128 private constant MIN = -1e18;
+    int128 private constant MAX18 = 1e30;
+    int128 private constant MIN18 = -1e30;
+    int128 private constant ADJ18 = 1e12;
     int128 internal constant UNITY = 1e6;
     int128 internal constant PI = 3_141593;
     int128 internal constant E = 2_718282;
@@ -19,19 +21,20 @@ contract Hexagon {
     /// @param x First operand in mathematical operation
 
     modifier check(int128 x) {
-        require(x > MIN_INT && x < MAX_INT);
+        require(x > MIN && x < MAX);
         _;
     }
 
     function from18(int256 x) internal pure returns (int128 result) {
         unchecked {
-            result = int128(x / ADJ_18);
+            require(x > MIN18 && x < MAX18);
+            result = int128(x / ADJ18);
         }
     }
 
     function to18(int128 x) internal pure check(x) returns (int256 result) {
         unchecked {
-            result = x * ADJ_18;
+            result = x * ADJ18;
         }
     }
 
