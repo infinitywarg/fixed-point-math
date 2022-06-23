@@ -12,6 +12,8 @@ contract ArgonMath {
     int256 private constant MAX = 1e36;
     int256 private constant MIN = -1e36;
     int256 internal constant UNITY = 1e18;
+    uint256 internal constant UNITY_ROOT = 1e9;
+    int256 internal constant HALF_UNITY = 5 * 1e17;
     int256 internal constant HUNDRED = 1e20;
     int256 internal constant PI = 3_141592_653589_793238;
     int256 internal constant E = 2_718281_828459_045235;
@@ -84,12 +86,30 @@ contract ArgonMath {
         if (x == 0) {
             return 0;
         }
-        result = _sqrt(x * UNITY);
+        result = int256(sqrtInt(uint256(x)) * UNITY_ROOT);
     }
 
-    function _sqrt(int256 x) private pure check(x) returns (int256 result) {
+    function log2(int256 x) internal pure checkNegative(x) returns (int256 result) {}
+
+    function ln(int256 x) internal pure checkNegative(x) returns (int256 result) {
+        unchecked {}
+    }
+
+    function exp(int256 x) internal pure check(x) returns (int256 result) {
+        unchecked {}
+    }
+
+    function exp2(int256 x) internal pure check(x) returns (int256 result) {
+        unchecked {}
+    }
+
+    function pow(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
+        unchecked {}
+    }
+
+    function sqrtInt(uint256 x) internal pure returns (uint256 result) {
         // Set the initial guess to the least power of two that is greater than or equal to sqrt(x).
-        int256 xAux = x;
+        uint256 xAux = x;
         result = 1;
         if (xAux >= 0x100000000000000000000000000000000) {
             xAux >>= 128;
@@ -129,32 +149,8 @@ contract ArgonMath {
             result = (result + x / result) >> 1;
             result = (result + x / result) >> 1;
             // Seven iterations should be enough
-            int256 roundedDownResult = x / result;
+            uint256 roundedDownResult = x / result;
             return result >= roundedDownResult ? roundedDownResult : result;
         }
-    }
-
-    function ln(int256 x) internal pure checkNegative(x) returns (int256 result) {
-        unchecked {
-            require(x >= 0);
-        }
-    }
-
-    function log2(int256 x) internal pure checkNegative(x) returns (int256 result) {
-        unchecked {
-            require(x >= 0);
-        }
-    }
-
-    function exp(int256 x) internal pure check(x) returns (int256 result) {
-        unchecked {}
-    }
-
-    function exp2(int256 x) internal pure check(x) returns (int256 result) {
-        unchecked {}
-    }
-
-    function pow(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
-        unchecked {}
     }
 }
