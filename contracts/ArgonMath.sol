@@ -20,8 +20,7 @@ contract ArgonMath {
     error Argon__Overflow(int256 x);
     error Argon__Underflow(int256 x);
     error Argon__DivideByZero(int256 x, int256 y);
-    error Argon__NegativeSqrt(int256 x);
-    error Argon__NegativeLog(int256 x);
+    error Argon__NegativeInput(int256 x);
 
     /// @notice Modifier to check for overflow and underflow
     /// @dev Maximum Decimal Value = 999999999999999999.999999999999999999
@@ -38,49 +37,35 @@ contract ArgonMath {
         _;
     }
 
-    function add(int256 x, int256 y)
-        internal
-        pure
-        check(x)
-        check(y)
-        returns (int256 result)
-    {
+    modifier checkNegative(int256 x) {
+        if (x < 0) {
+            revert Argon__NegativeInput(x);
+        }
+        if (x >= MAX) {
+            revert Argon__Overflow(x);
+        }
+        _;
+    }
+
+    function add(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
         unchecked {
             result = x + y;
         }
     }
 
-    function sub(int256 x, int256 y)
-        internal
-        pure
-        check(x)
-        check(y)
-        returns (int256 result)
-    {
+    function sub(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
         unchecked {
             result = x - y;
         }
     }
 
-    function mul(int256 x, int256 y)
-        internal
-        pure
-        check(x)
-        check(y)
-        returns (int256 result)
-    {
+    function mul(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
         unchecked {
             result = (x * y) / UNITY;
         }
     }
 
-    function div(int256 x, int256 y)
-        internal
-        pure
-        check(x)
-        check(y)
-        returns (int256 result)
-    {
+    function div(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
         if (y == 0) {
             revert Argon__DivideByZero(x, y);
         }
@@ -89,38 +74,73 @@ contract ArgonMath {
         }
     }
 
-    function percent(int256 x, int256 y)
-        internal
-        pure
-        check(x)
-        check(y)
-        returns (int256 result)
-    {
+    function percent(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
         unchecked {
             result = (x * y) / HUNDRED;
         }
     }
 
-    function sqrt(int256 x) internal pure check(x) returns (int256 result) {
-        if (x < 0) {
-            revert Argon__NegativeSqrt(x);
+    function sqrt(int256 x) internal pure checkNegative(x) returns (int256 result) {
+        if (x == 0) {
+            return 0;
         }
-        unchecked {}
+        result = _sqrt(x * UNITY);
     }
 
-    function ln(int256 x) internal pure check(x) returns (int256 result) {
-        if (x < 0) {
-            revert Argon__NegativeLog(x);
+    function _sqrt(int256 x) private pure check(x) returns (int256 result) {
+        // Set the initial guess to the least power of two that is greater than or equal to sqrt(x).
+        int256 xAux = x;
+        result = 1;
+        if (xAux >= 0x100000000000000000000000000000000) {
+            xAux >>= 128;
+            result <<= 64;
         }
+        if (xAux >= 0x10000000000000000) {
+            xAux >>= 64;
+            result <<= 32;
+        }
+        if (xAux >= 0x100000000) {
+            xAux >>= 32;
+            result <<= 16;
+        }
+        if (xAux >= 0x10000) {
+            xAux >>= 16;
+            result <<= 8;
+        }
+        if (xAux >= 0x100) {
+            xAux >>= 8;
+            result <<= 4;
+        }
+        if (xAux >= 0x10) {
+            xAux >>= 4;
+            result <<= 2;
+        }
+        if (xAux >= 0x8) {
+            result <<= 1;
+        }
+
+        // The operations can never overflow because the result is max 2^127 when it enters this block.
+        unchecked {
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            // Seven iterations should be enough
+            int256 roundedDownResult = x / result;
+            return result >= roundedDownResult ? roundedDownResult : result;
+        }
+    }
+
+    function ln(int256 x) internal pure checkNegative(x) returns (int256 result) {
         unchecked {
             require(x >= 0);
         }
     }
 
-    function log2(int256 x) internal pure check(x) returns (int256 result) {
-        if (x < 0) {
-            revert Argon__NegativeLog(x);
-        }
+    function log2(int256 x) internal pure checkNegative(x) returns (int256 result) {
         unchecked {
             require(x >= 0);
         }
@@ -134,13 +154,7 @@ contract ArgonMath {
         unchecked {}
     }
 
-    function pow(int256 x, int256 y)
-        internal
-        pure
-        check(x)
-        check(y)
-        returns (int256 result)
-    {
+    function pow(int256 x, int256 y) internal pure check(x) check(y) returns (int256 result) {
         unchecked {}
     }
 }
