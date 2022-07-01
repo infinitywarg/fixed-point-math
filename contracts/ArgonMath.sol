@@ -147,6 +147,9 @@ contract ArgonMath {
     function pow(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 result) {}
 
     function sqrtInt(uint256 x) public pure returns (uint256 y) {
+        // Newton's algorithm to find integer sqaure root of x
+        // Outperforms Babylonian Method in gas cost as long as x > 7*1e9
+        // For 18 decimal fixed point numbers, this algo will always outperform
         unchecked {
             // find y such that y=2^m, such that 2^m <= sqrt(n) < 2^(m+1)
             uint256 xReducer = x;
@@ -157,7 +160,6 @@ contract ArgonMath {
                     y <<= (i / 2);
                 }
             }
-            // Newton's algorithm to find interget part of sqaure root of x
             // repeat y=(y+x/y)/2 until y>=x
             for (uint8 j = 0; j < 7; j++) {
                 y = (y + x / y) >> 1;
