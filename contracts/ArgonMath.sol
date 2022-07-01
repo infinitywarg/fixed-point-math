@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity =0.8.8;
 
-contract ArgonMath {
+library ArgonMath {
     uint256 private constant OVERFLOW = 2**128;
     uint256 private constant SCALE = 1e18;
     uint256 private constant SCALE_SQUARE = 1e36;
@@ -13,6 +13,7 @@ contract ArgonMath {
     uint256 private constant SCALED_LB_E = 1_442695_040888_963407;
 
     error Argon__Overflow(uint256 x);
+    error Argon__SubtractionIsNegative(uint256 x, uint256 y);
     error Argon__DivideByZero(uint256 x, uint256 y);
     error Argon__LargeExponentInput(uint256 x);
     error Argon__LargeBinExponentInput(uint256 x);
@@ -46,6 +47,9 @@ contract ArgonMath {
     /// @param y a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
     function sub(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 n) {
+        if (x < y) {
+            revert Argon__SubtractionIsNegative(x, y);
+        }
         unchecked {
             n = x - y;
         }
