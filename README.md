@@ -9,6 +9,6 @@
 
 ---
 
-<p align = "center">💡 Overflow secure Solidity advanced math library for 18-decimal fixed point unsigned integers 💡</p>
+<p align = "center">💡 Overflow secure Solidity advanced math library for 18-decimal fixed point arithmetic 💡</p>
 
 ## Table of Contents
