@@ -7,3 +7,7 @@ typechain
 #Hardhat files
 cache
 artifacts
+
+#Remix compilation
+contracts/.deps/
+contracts/artifacts/
