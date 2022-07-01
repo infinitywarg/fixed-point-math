@@ -98,7 +98,7 @@ contract ArgonMath {
         if (x == 0) {
             return 0;
         }
-        result = _sqrt(x) * SCALE_ROOT;
+        result = sqrtInt(x) * SCALE_ROOT;
     }
 
     function log2(uint256 x) internal pure returns (uint256 result) {
@@ -146,50 +146,23 @@ contract ArgonMath {
 
     function pow(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 result) {}
 
-    function _sqrt(uint256 x) private pure returns (uint256 result) {
-        // Set the initial guess to the least power of two that is greater than or equal to sqrt(x).
-        uint256 xAux = x;
-        result = 1;
-        if (xAux >= 0x100000000000000000000000000000000) {
-            xAux >>= 128;
-            result <<= 64;
-        }
-        if (xAux >= 0x10000000000000000) {
-            xAux >>= 64;
-            result <<= 32;
-        }
-        if (xAux >= 0x100000000) {
-            xAux >>= 32;
-            result <<= 16;
-        }
-        if (xAux >= 0x10000) {
-            xAux >>= 16;
-            result <<= 8;
-        }
-        if (xAux >= 0x100) {
-            xAux >>= 8;
-            result <<= 4;
-        }
-        if (xAux >= 0x10) {
-            xAux >>= 4;
-            result <<= 2;
-        }
-        if (xAux >= 0x8) {
-            result <<= 1;
-        }
-
-        // The operations can never overflow because the result is max 2^127 when it enters this block.
+    function sqrtInt(uint256 x) public pure returns (uint256 y) {
         unchecked {
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            // Seven iterations should be enough
-            uint256 roundedDownResult = x / result;
-            return result >= roundedDownResult ? roundedDownResult : result;
+            // find y such that y=2^m, such that 2^m <= sqrt(n) < 2^(m+1)
+            uint256 xReducer = x;
+            y = 1;
+            for (uint8 i = 128; i >= 2; i /= 2) {
+                if (xReducer >= 2**i) {
+                    xReducer >>= i;
+                    y <<= (i / 2);
+                }
+            }
+            // Newton's algorithm to find interget part of sqaure root of x
+            // repeat y=(y+x/y)/2 until y>=x
+            for (uint8 j = 0; j < 7; j++) {
+                y = (y + x / y) >> 1;
+            }
+            return y >= (x / y) ? (x / y) : y;
         }
     }
 
