@@ -3,9 +3,9 @@ pragma solidity =0.8.8;
 
 contract ArgonMath {
     uint256 private constant OVERFLOW = 2**128;
-    uint256 private constant SCALING = 1e18;
-    uint256 private constant SCALING_SQUARE = 1e36;
-    uint256 private constant SCALING_ROOT = 1e36;
+    uint256 private constant SCALE = 1e18;
+    uint256 private constant SCALE_SQUARE = 1e36;
+    uint256 private constant SCALE_ROOT = 1e36;
     uint256 private constant SCALED_HUNDRED = 1e20;
     uint256 private constant SCALED_HALF = 5 * 1e17;
     uint256 private constant SCALED_PI = 3_141592_653589_793238;
@@ -57,7 +57,7 @@ contract ArgonMath {
     /// @return n the return variables of a contract’s function state variable
     function mul(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 n) {
         unchecked {
-            n = (x * y) / SCALING;
+            n = (x * y) / SCALE;
         }
     }
 
@@ -71,7 +71,7 @@ contract ArgonMath {
             revert Argon__DivideByZero(x, y);
         }
         unchecked {
-            n = (x * SCALING) / y;
+            n = (x * SCALE) / y;
         }
     }
 
@@ -81,7 +81,7 @@ contract ArgonMath {
     /// @return n the return variables of a contract’s function state variable
     function inv(uint256 x) internal pure check(x) returns (uint256 n) {
         unchecked {
-            n = SCALING_SQUARE / x;
+            n = SCALE_SQUARE / x;
         }
     }
 
@@ -111,7 +111,7 @@ contract ArgonMath {
     ) internal pure check(x1) check(y1) check(x2) check(y2) returns (uint256 n) {
         unchecked {
             n = (x1 * y1) / (y1 + y2) + (x2 * y2) / (y1 + y2);
-            n /= SCALING;
+            n /= SCALE;
         }
     }
 
@@ -154,7 +154,7 @@ contract ArgonMath {
             n = (n + x / n) >> 1;
             n = (n + x / n) >> 1;
             n = (n >= (x / n)) ? (x / n) : n;
-            n *= SCALING_ROOT;
+            n *= SCALE_ROOT;
         }
     }
 
@@ -163,7 +163,7 @@ contract ArgonMath {
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
     function lb(uint256 x) internal pure check(x) returns (uint256 n) {
-        if (x < SCALING) {
+        if (x < SCALE) {
             revert Argon__LogNegativeResult(x);
         }
         unchecked {}
@@ -174,7 +174,7 @@ contract ArgonMath {
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
     function ln(uint256 x) internal pure check(x) returns (uint256 n) {
-        if (x < SCALING) {
+        if (x < SCALE) {
             revert Argon__LogNegativeResult(x);
         }
         unchecked {}
