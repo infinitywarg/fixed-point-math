@@ -10,12 +10,13 @@ contract ArgonMath {
     uint256 private constant SCALED_HALF = 5 * 1e17;
     uint256 private constant SCALED_PI = 3_141592_653589_793238;
     uint256 private constant SCALED_E = 2_718281_828459_045235;
+    uint256 private constant SCALED_LB_E = 1_442695_040888_963407;
 
     error Argon__Overflow(uint256 x);
     error Argon__DivideByZero(uint256 x, uint256 y);
-    error Argon__LargeExpInput(uint256 x);
-    error Argon__LargeBexpInput(uint256 x);
-    error Argon__LogNegativeResult(uint256 x);
+    error Argon__LargeExponentInput(uint256 x);
+    error Argon__LargeBinExponentInput(uint256 x);
+    error Argon__LogIsNegative(uint256 x);
 
     /// @notice Modifier to check for overflow
     /// @dev Maximum Value = (2^128-1)/(10^18) =
@@ -164,9 +165,23 @@ contract ArgonMath {
     /// @return n the return variables of a contract’s function state variable
     function lb(uint256 x) internal pure check(x) returns (uint256 n) {
         if (x < SCALE) {
-            revert Argon__LogNegativeResult(x);
+            revert Argon__LogIsNegative(x);
         }
-        unchecked {}
+        unchecked {
+            uint256 m = _lbfloor(x / SCALE);
+            n = m * SCALE;
+            uint256 y = x >> m;
+            if (y == SCALE) {
+                return n;
+            }
+            for (uint256 delta = SCALED_HALF; delta > 0; delta >>= 1) {
+                y = (y * y) / SCALE;
+                if (y >= 2 * SCALE) {
+                    n += delta;
+                    y >>= 1;
+                }
+            }
+        }
     }
 
     /// @notice Explain to an end user what this does
@@ -175,22 +190,24 @@ contract ArgonMath {
     /// @return n the return variables of a contract’s function state variable
     function ln(uint256 x) internal pure check(x) returns (uint256 n) {
         if (x < SCALE) {
-            revert Argon__LogNegativeResult(x);
+            revert Argon__LogIsNegative(x);
         }
-        unchecked {}
+        unchecked {
+            n = (lb(x) * SCALE) / SCALED_LB_E;
+        }
     }
 
     /// @notice Explain to an end user what this does
     /// @dev Explain to a developer any extra details
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
-    function exp(uint256 x) internal pure returns (uint256 n) {}
+    function ex(uint256 x) internal pure returns (uint256 n) {}
 
     /// @notice Explain to an end user what this does
     /// @dev Explain to a developer any extra details
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
-    function bexp(uint256 x) internal pure returns (uint256 n) {}
+    function bx(uint256 x) internal pure returns (uint256 n) {}
 
     /// @notice Explain to an end user what this does
     /// @dev Explain to a developer any extra details
