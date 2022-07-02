@@ -5,7 +5,7 @@ library ArgonMath {
     uint256 private constant OVERFLOW = 2**128;
     uint256 private constant SCALE = 1e18;
     uint256 private constant SCALE_SQUARE = 1e36;
-    uint256 private constant SCALE_ROOT = 1e36;
+    uint256 private constant SCALE_ROOT = 1e9;
     uint256 private constant SCALED_HUNDRED = 1e20;
     uint256 private constant SCALED_HALF = 5 * 1e17;
     uint256 private constant SCALED_PI = 3_141592_653589_793238;
@@ -30,22 +30,22 @@ library ArgonMath {
         _;
     }
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param x a parameter just like in doxygen (must be followed by parameter name)
-    /// @param y a parameter just like in doxygen (must be followed by parameter name)
-    /// @return n the return variables of a contract’s function state variable
+    /// @notice Adds two 18-decimal fixed point numbers
+    /// @dev Addition never overflows as 2*(2^128-1) < 2^256-1
+    /// @param x First operand
+    /// @param y Second operand
+    /// @return n Addition result
     function add(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 n) {
         unchecked {
             n = x + y;
         }
     }
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param x a parameter just like in doxygen (must be followed by parameter name)
-    /// @param y a parameter just like in doxygen (must be followed by parameter name)
-    /// @return n the return variables of a contract’s function state variable
+    /// @notice Subtracts two 18-decimal fixed point numbers
+    /// @dev Subtraction never underflows as x < y check is made
+    /// @param x First operand
+    /// @param y Second operand
+    /// @return n Subtraction result
     function sub(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 n) {
         if (x < y) {
             revert Argon__SubtractionIsNegative(x, y);
@@ -55,22 +55,22 @@ library ArgonMath {
         }
     }
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param x a parameter just like in doxygen (must be followed by parameter name)
-    /// @param y a parameter just like in doxygen (must be followed by parameter name)
-    /// @return n the return variables of a contract’s function state variable
+    /// @notice Multiplies two 18-decimal fixed point numbers
+    /// @dev Multiplication never overflows as (2^128-1)^2 < 2^256-1
+    /// @param x First operand
+    /// @param y Second operand
+    /// @return n Multiplication result
     function mul(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 n) {
         unchecked {
             n = (x * y) / SCALE;
         }
     }
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param x a parameter just like in doxygen (must be followed by parameter name)
-    /// @param y a parameter just like in doxygen (must be followed by parameter name)
-    /// @return n the return variables of a contract’s function state variable
+    /// @notice Divides two 18-decimal fixed point numbers
+    /// @dev Division never overflows as (2^128-1)*(10^18) < 2^256-1
+    /// @param x First operand
+    /// @param y Second operand
+    /// @return n Division result
     function div(uint256 x, uint256 y) internal pure check(x) check(y) returns (uint256 n) {
         if (y == 0) {
             revert Argon__DivideByZero(x, y);
@@ -80,7 +80,7 @@ library ArgonMath {
         }
     }
 
-    /// @notice Explain to an end user what this does
+    /// @notice Calculates multiplicative inverse of x
     /// @dev Explain to a developer any extra details
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
@@ -125,7 +125,7 @@ library ArgonMath {
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
     /// @param y a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
-    function percent(uint256 x, uint256 y) internal pure check(x) check(n) returns (uint256 n) {
+    function pc(uint256 x, uint256 y) internal pure check(x) check(n) returns (uint256 n) {
         unchecked {
             n = (x * y) / SCALED_HUNDRED;
         }
@@ -151,7 +151,7 @@ library ArgonMath {
     /// @return n the return variables of a contract’s function state variable
     function sqrt(uint256 x) public pure check(x) returns (uint256 n) {
         unchecked {
-            n = _sqrtinit(x);
+            n = 2**(_lbfloor(x) / 2);
             n = (n + x / n) >> 1;
             n = (n + x / n) >> 1;
             n = (n + x / n) >> 1;
@@ -178,10 +178,10 @@ library ArgonMath {
             if (y == SCALE) {
                 return n;
             }
-            for (uint256 delta = SCALED_HALF; delta > 0; delta >>= 1) {
+            for (uint256 z = SCALED_HALF; z > 0; z >>= 1) {
                 y = (y * y) / SCALE;
                 if (y >= 2 * SCALE) {
-                    n += delta;
+                    n += z;
                     y >>= 1;
                 }
             }
@@ -213,10 +213,10 @@ library ArgonMath {
     /// @return n the return variables of a contract’s function state variable
     function bx(uint256 x) internal pure returns (uint256 n) {}
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
+    /// @notice Calculates integer part of binary logarithm of x
+    /// @dev useful in binary log and initial guess for Newton's square root algorithm
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
-    /// @return n the return variables of a contract’s function state variable
+    /// @return n returns result such that 2^result <= x < 2^(result+1)
     function _lbfloor(uint256 x) private pure returns (uint256 n) {
         unchecked {
             if (x >= 0x10000000000000000) {
@@ -246,16 +246,6 @@ library ArgonMath {
             if (x >= 0x2) {
                 n += 1;
             }
-        }
-    }
-
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param x a parameter just like in doxygen (must be followed by parameter name)
-    /// @return n the return variables of a contract’s function state variable
-    function _sqrtinit(uint256 x) private pure returns (uint256 n) {
-        unchecked {
-            n = 2**(_lbfloor(x) / 2);
         }
     }
 }
