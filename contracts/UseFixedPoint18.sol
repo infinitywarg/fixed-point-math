@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity =0.8.8;
+pragma solidity =0.8.17;
 
 import "hardhat/console.sol";
-import "./ArgonMath.sol";
+import {FixedPoint18} from "./FixedPoint18.sol";
 
-contract TestArgonMath {
-    using ArgonMath for uint256;
+contract UseFixedPoint18 {
+    using FixedPoint18 for uint256;
 
     function add(uint256 x, uint256 y) public view returns (uint256 n) {
         uint256 startGas = gasleft();
@@ -47,12 +47,7 @@ contract TestArgonMath {
         // 152
     }
 
-    function wavg(
-        uint256 x1,
-        uint256 y1,
-        uint256 x2,
-        uint256 y2
-    ) public view returns (uint256 n) {
+    function wavg(uint256 x1, uint256 y1, uint256 x2, uint256 y2) public view returns (uint256 n) {
         uint256 startGas = gasleft();
         n = x1.wavg(y1, x2, y2);
         console.log(startGas - gasleft());

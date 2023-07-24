@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
-pragma solidity =0.8.8;
+pragma solidity =0.8.17;
 
-library ArgonMath {
-    uint256 private constant OVERFLOW = 2**128;
+library FixedPoint6 {
+    uint256 private constant OVERFLOW = 2 ** 128;
     uint256 private constant SCALE = 1e18;
     uint256 private constant SCALE_SQUARE = 1e36;
     uint256 private constant SCALE_ROOT = 1e9;
@@ -151,7 +151,7 @@ library ArgonMath {
     /// @return n the return variables of a contract’s function state variable
     function sqrt(uint256 x) public pure check(x) returns (uint256 n) {
         unchecked {
-            n = 2**(_lbfloor(x) / 2);
+            n = 2 ** (_lbfloor(x) / 2);
             n = (n + x / n) >> 1;
             n = (n + x / n) >> 1;
             n = (n + x / n) >> 1;

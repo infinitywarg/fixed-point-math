@@ -1,7 +1,6 @@
-node_modules/
-artifacts/
-cache/
-images/
+node_modules
+artifacts
+cache
 coverage*
 gasReporterOutput.json
 package.json
@@ -10,5 +9,4 @@ img
 .*
 README.md
 coverage.json
-
-
+deployments
