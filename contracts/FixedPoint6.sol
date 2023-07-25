@@ -37,8 +37,8 @@ library FixedPoint6 {
     /// @param y Second operand
     /// @return n Addition result
     function add(uint128 x, uint128 y) internal pure check(x) check(y) returns (uint128 n) {
-        unchecked {
-            n = x + y;
+        assembly {
+            n := add(x, y)
         }
     }
 
@@ -51,8 +51,8 @@ library FixedPoint6 {
         if (x < y) {
             revert FixedPoint6__SubtractionIsNegative(x, y);
         }
-        unchecked {
-            n = x - y;
+        assembly {
+            n := sub(x, y)
         }
     }
 
@@ -62,8 +62,8 @@ library FixedPoint6 {
     /// @param y Second operand
     /// @return n Multiplication result
     function mul(uint128 x, uint128 y) internal pure check(x) check(y) returns (uint128 n) {
-        unchecked {
-            n = (x * y) / SCALE;
+        assembly {
+            n := div(mul(x, y), SCALE)
         }
     }
 
@@ -76,8 +76,8 @@ library FixedPoint6 {
         if (y == 0) {
             revert FixedPoint6__DivideByZero(x, y);
         }
-        unchecked {
-            n = (x * SCALE) / y;
+        assembly {
+            n := div(mul(x, SCALE), y)
         }
     }
 
@@ -86,8 +86,8 @@ library FixedPoint6 {
     /// @param x a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
     function inv(uint128 x) internal pure check(x) returns (uint128 n) {
-        unchecked {
-            n = SCALE_SQUARE / x;
+        assembly {
+            n := div(SCALE_SQUARE, x)
         }
     }
 
@@ -97,8 +97,8 @@ library FixedPoint6 {
     /// @param y a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
     function avg(uint128 x, uint128 y) internal pure check(x) check(y) returns (uint128 n) {
-        unchecked {
-            n = (x + y) >> 1;
+        assembly {
+            n := shr(1, add(x, y))
         }
     }
 
@@ -108,8 +108,8 @@ library FixedPoint6 {
     /// @param y a parameter just like in doxygen (must be followed by parameter name)
     /// @return n the return variables of a contract’s function state variable
     function pc(uint128 x, uint128 y) internal pure check(x) check(n) returns (uint128 n) {
-        unchecked {
-            n = (x * y) / SCALED_HUNDRED;
+        assembly {
+            n := div(mul(x, y), SCALED_HUNDRED)
         }
     }
 
